@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VoltGuard IoT — Smart Multi-House Energy Monitoring System. Live AC telemetry, house-wise consumption comparison, automated monthly energy reports, and email delivery.">
+    <title>VoltGuard IoT — Smart Multi-House Energy Monitoring System</title>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js for Live Power and Energy Comparison Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- html2pdf.js for Client-Side Executive PDF Report Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- =====================================================
+         SIDEBAR NAVIGATION
+         ===================================================== -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon" aria-hidden="true">⚡</div>
+            <div>
+                <h2>VoltGuard <span>IoT</span></h2>
+                <p>Smart Energy Monitoring</p>
+            </div>
+        </div>
+
+        <nav class="navigation" aria-label="Main Navigation">
+            <a href="#dashboard" class="nav-link active" id="navDashboard">
+                <span class="nav-icon">▦</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#houses" class="nav-link" id="navHouses">
+                <span class="nav-icon">⌂</span>
+                <span>House Telemetry</span>
+            </a>
+            <a href="#comparison" class="nav-link" id="navComparison">
+                <span class="nav-icon">▥</span>
+                <span>Live Power</span>
+            </a>
+            <a href="#analytics" class="nav-link" id="navAnalytics">
+                <span class="nav-icon">⌁</span>
+                <span>Energy Analytics</span>
+            </a>
+            <a href="#reports" class="nav-link" id="navReports">
+                <span class="nav-icon">▤</span>
+                <span>Monthly Reports</span>
+            </a>
+            <a href="#scheduling" class="nav-link" id="navScheduling">
+                <span class="nav-icon">⏱</span>
+                <span>Email Scheduler</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-status-card">
+            <div class="status-card-header">
+                <span class="status-indicator-dot" id="sidebarStatusDot"></span>
+                <span class="status-card-title" id="sidebarStatusText">Demo Mode (Simulation)</span>
+            </div>
+            <p class="status-card-detail" id="sidebarStatusDetail">Stand-alone single-phase model active</p>
+            <div class="status-card-tariff">
+                <span>Active Tariff:</span>
+                <strong id="sidebarTariffBadge">₹8.50 / kWh</strong>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <span>VoltGuard IoT v2.4 PRO</span>
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT AREA
+         ===================================================== -->
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+            <div>
+                <h1>VoltGuard IoT — Energy Monitoring</h1>
+                <p>Simultaneous real-time electrical telemetry, multi-residence comparison &amp; automated reporting.</p>
+            </div>
+
+            <div class="header-actions">
+                <div class="badge simulation-alert-badge" title="Telemetry generated via verified mathematical model">
+                    <span class="pulse-dot"></span>
+                    <span>SIMULATED TELEMETRY</span>
+                </div>
+
+                <div class="badge backend-status-badge" id="backendStatusBadge" title="Click to test backend connection">
+                    <span class="status-indicator-dot" id="topbarStatusDot"></span>
+                    <span id="backendStatusLabel">Checking API...</span>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- =====================================================
+             SECTION 1: DASHBOARD & THREE-HOUSE MONITORING
+             ===================================================== -->
+        <section id="dashboard" class="dashboard-section">
+
+            <div class="section-heading" id="houses">
+                <div>
+                    <h2>Multi-House Telemetry Overview</h2>
+                    <p>Independent real-time electrical measurements across 3 simulated residential loads.</p>
+                </div>
+
+                <div class="heading-meta">
+                    <span class="simulated-flag-label">⚡ Single-Phase AC Model (P = V · I · PF)</span>
+                    <span class="updated-label" id="lastUpdated">Initializing telemetry...</span>
+                </div>
+            </div>
+
+            <!-- THREE HOUSE CARDS GRID -->
+            <div class="house-cards-grid" id="houseCardsGrid">
+
+                <!-- HOUSE 1: Villa / Main Residence -->
+                <article class="house-monitor-card house-one-card" id="cardHouse1">
+                    <div class="house-card-heading">
+                        <div class="house-identity">
+                            <span class="house-badge badge-h1">HOUSE 1</span>
+                            <h3>Villa / Main Residence</h3>
+                            <p class="house-subtext">High load · 3-Phase split simulation</p>
+                        </div>
+                        <div class="house-status-indicator">
+                            <span class="live-pulse live-pulse-cyan"></span>
+                            <span class="live-label">LIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="house-reading-grid">
+                        <div class="house-reading">
+                            <span class="reading-label">AC VOLTAGE</span>
+                            <strong class="reading-value" id="house1Voltage">-- V</strong>
+                            <small class="reading-hint">Nominal 230V ± 5%</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">AC CURRENT</span>
+                            <strong class="reading-value" id="house1Current">-- A</strong>
+                            <small class="reading-hint">I = P / (V × PF)</small>
+                        </div>
+                        <div class="house-reading power-reading highlight-cyan">
+                            <span class="reading-label">ACTIVE POWER</span>
+                            <strong class="reading-value" id="house1Power">-- W</strong>
+                            <small class="reading-hint">Instantaneous load</small>
+                        </div>
+                        <div class="house-reading energy-reading">
+                            <span class="reading-label">TOTAL ENERGY</span>
+                            <strong class="reading-value" id="house1Energy">-- kWh</strong>
+                            <small class="reading-hint">Accumulated session</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">AC FREQUENCY</span>
+                            <strong class="reading-value" id="house1Frequency">-- Hz</strong>
+                            <small class="reading-hint">Grid 50.0 Hz</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">POWER FACTOR</span>
+                            <strong class="reading-value" id="house1PF">-- PF</strong>
+                            <small class="reading-hint">Lagging load</small>
+                        </div>
+                        <div class="house-reading cost-reading highlight-pink">
+                            <span class="reading-label">ESTIMATED ELECTRICITY COST</span>
+                            <strong class="reading-value" id="house1Cost">₹--</strong>
+                            <small class="reading-hint" id="house1CostRate">@ ₹8.50 / kWh</small>
+                        </div>
+                    </div>
+
+                    <div class="house-card-footer">
+                        <span class="footer-timestamp">Last updated: <strong class="houseUpdated" id="house1Updated">--</strong></span>
+                        <button type="button" class="secondary-button house-report-button" data-house="0" id="btnHouse1Report">
+                            House Report ↗
+                        </button>
+                    </div>
+                </article>
+
+
+                <!-- HOUSE 2: Urban Apartment -->
+                <article class="house-monitor-card house-two-card" id="cardHouse2">
+                    <div class="house-card-heading">
+                        <div class="house-identity">
+                            <span class="house-badge badge-h2">HOUSE 2</span>
+                            <h3>Urban Apartment</h3>
+                            <p class="house-subtext">Medium load · 2BHK Residential Flat</p>
+                        </div>
+                        <div class="house-status-indicator">
+                            <span class="live-pulse live-pulse-blue"></span>
+                            <span class="live-label">LIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="house-reading-grid">
+                        <div class="house-reading">
+                            <span class="reading-label">AC VOLTAGE</span>
+                            <strong class="reading-value" id="house2Voltage">-- V</strong>
+                            <small class="reading-hint">Nominal 230V ± 5%</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">AC CURRENT</span>
+                            <strong class="reading-value" id="house2Current">-- A</strong>
+                            <small class="reading-hint">I = P / (V × PF)</small>
+                        </div>
+                        <div class="house-reading power-reading highlight-blue">
+                            <span class="reading-label">ACTIVE POWER</span>
+                            <strong class="reading-value" id="house2Power">-- W</strong>
+                            <small class="reading-hint">Instantaneous load</small>
+                        </div>
+                        <div class="house-reading energy-reading">
+                            <span class="reading-label">TOTAL ENERGY</span>
+                            <strong class="reading-value" id="house2Energy">-- kWh</strong>
+                            <small class="reading-hint">Accumulated session</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">AC FREQUENCY</span>
+                            <strong class="reading-value" id="house2Frequency">-- Hz</strong>
+                            <small class="reading-hint">Grid 50.0 Hz</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">POWER FACTOR</span>
+                            <strong class="reading-value" id="house2PF">-- PF</strong>
+                            <small class="reading-hint">Lagging load</small>
+                        </div>
+                        <div class="house-reading cost-reading highlight-pink">
+                            <span class="reading-label">ESTIMATED ELECTRICITY COST</span>
+                            <strong class="reading-value" id="house2Cost">₹--</strong>
+                            <small class="reading-hint" id="house2CostRate">@ ₹8.50 / kWh</small>
+                        </div>
+                    </div>
+
+                    <div class="house-card-footer">
+                        <span class="footer-timestamp">Last updated: <strong class="houseUpdated" id="house2Updated">--</strong></span>
+                        <button type="button" class="secondary-button house-report-button" data-house="1" id="btnHouse2Report">
+                            House Report ↗
+                        </button>
+                    </div>
+                </article>
+
+
+                <!-- HOUSE 3: Studio Flat / Annex -->
+                <article class="house-monitor-card house-three-card" id="cardHouse3">
+                    <div class="house-card-heading">
+                        <div class="house-identity">
+                            <span class="house-badge badge-h3">HOUSE 3</span>
+                            <h3>Studio Flat / Annex</h3>
+                            <p class="house-subtext">Light load · Studio Annex Unit</p>
+                        </div>
+                        <div class="house-status-indicator">
+                            <span class="live-pulse live-pulse-purple"></span>
+                            <span class="live-label">LIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="house-reading-grid">
+                        <div class="house-reading">
+                            <span class="reading-label">AC VOLTAGE</span>
+                            <strong class="reading-value" id="house3Voltage">-- V</strong>
+                            <small class="reading-hint">Nominal 230V ± 5%</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">AC CURRENT</span>
+                            <strong class="reading-value" id="house3Current">-- A</strong>
+                            <small class="reading-hint">I = P / (V × PF)</small>
+                        </div>
+                        <div class="house-reading power-reading highlight-purple">
+                            <span class="reading-label">ACTIVE POWER</span>
+                            <strong class="reading-value" id="house3Power">-- W</strong>
+                            <small class="reading-hint">Instantaneous load</small>
+                        </div>
+                        <div class="house-reading energy-reading">
+                            <span class="reading-label">TOTAL ENERGY</span>
+                            <strong class="reading-value" id="house3Energy">-- kWh</strong>
+                            <small class="reading-hint">Accumulated session</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">AC FREQUENCY</span>
+                            <strong class="reading-value" id="house3Frequency">-- Hz</strong>
+                            <small class="reading-hint">Grid 50.0 Hz</small>
+                        </div>
+                        <div class="house-reading">
+                            <span class="reading-label">POWER FACTOR</span>
+                            <strong class="reading-value" id="house3PF">-- PF</strong>
+                            <small class="reading-hint">Lagging load</small>
+                        </div>
+                        <div class="house-reading cost-reading highlight-pink">
+                            <span class="reading-label">ESTIMATED ELECTRICITY COST</span>
+                            <strong class="reading-value" id="house3Cost">₹--</strong>
+                            <small class="reading-hint" id="house3CostRate">@ ₹8.50 / kWh</small>
+                        </div>
+                    </div>
+
+                    <div class="house-card-footer">
+                        <span class="footer-timestamp">Last updated: <strong class="houseUpdated" id="house3Updated">--</strong></span>
+                        <button type="button" class="secondary-button house-report-button" data-house="2" id="btnHouse3Report">
+                            House Report ↗
+                        </button>
+                    </div>
+                </article>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SECTION 2: LIVE POWER COMPARISON (LINE CHART)
+             ===================================================== -->
+        <section id="comparison" class="panel live-power-panel">
+
+            <div class="panel-header">
+                <div>
+                    <h2>Live Power Consumption Chart (W)</h2>
+                    <p>Instantaneous power demand across all three residences tracked synchronously.</p>
+                </div>
+
+                <div class="chart-legend-badges">
+                    <span class="legend-badge h1-legend"><span class="legend-color-dot" style="background:#06c6df"></span> House 1 (Villa)</span>
+                    <span class="legend-badge h2-legend"><span class="legend-color-dot" style="background:#3984ff"></span> House 2 (Apartment)</span>
+                    <span class="legend-badge h3-legend"><span class="legend-color-dot" style="background:#a78bfa"></span> House 3 (Studio)</span>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="powerComparisonChart" aria-label="Real-time power comparison chart" role="img"></canvas>
+            </div>
+
+            <!-- REAL-TIME TELEMETRY STRIP -->
+            <div class="live-stats-strip">
+                <div class="stat-pill">
+                    <span class="stat-pill-label">House 1 Power:</span>
+                    <strong class="stat-pill-val" id="stripH1Power" style="color:var(--cyan)">-- W</strong>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-label">House 2 Power:</span>
+                    <strong class="stat-pill-val" id="stripH2Power" style="color:var(--blue)">-- W</strong>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-label">House 3 Power:</span>
+                    <strong class="stat-pill-val" id="stripH3Power" style="color:var(--purple)">-- W</strong>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-label">Combined Total Demand:</span>
+                    <strong class="stat-pill-val" id="stripTotalPower" style="color:var(--green)">-- W</strong>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SECTION 3: ENERGY ANALYTICS & PERIOD COMPARISON
+             ===================================================== -->
+        <section id="analytics" class="analytics-grid">
+
+            <!-- LEFT: BAR CHART & PERIOD SELECTION -->
+            <article class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Energy Consumption Comparison</h2>
+                        <p>House-wise accumulated energy (kWh) and period analysis.</p>
+                    </div>
+
+                    <!-- PERIOD FILTER CONTROLS -->
+                    <div class="period-button-group" role="group" aria-label="Period Comparison">
+                        <button type="button" class="period-btn active" data-period="day" id="btnPeriodDay">Current Day</button>
+                        <button type="button" class="period-btn" data-period="month" id="btnPeriodMonth">Current Month</button>
+                        <button type="button" class="period-btn" data-period="prev_month" id="btnPeriodPrevMonth">Previous Month</button>
+                        <button type="button" class="period-btn" data-period="custom" id="btnPeriodCustom">Custom</button>
+                    </div>
+                </div>
+
+                <!-- CUSTOM DATE RANGE FILTER (TOGGLED) -->
+                <div class="custom-range-bar" id="customRangeBar" hidden>
+                    <div class="range-field">
+                        <label for="customStartDate">From Date:</label>
+                        <input type="date" id="customStartDate">
+                    </div>
+                    <div class="range-field">
+                        <label for="customEndDate">To Date:</label>
+                        <input type="date" id="customEndDate">
+                    </div>
+                    <button type="button" class="secondary-button" id="btnApplyCustomRange">Apply Filter</button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="energyComparisonChart" aria-label="Energy comparison bar chart" role="img"></canvas>
+                </div>
+
+                <p class="period-disclaimer-note" id="periodDisclaimerNote">
+                    ℹ Currently showing real-time accumulated session energy. Historical multi-month calendar data requires persisted database records.
+                </p>
+
+            </article>
+
+
+            <!-- RIGHT: HOUSE-WISE RANKING & COMBINED TOTALS -->
+            <article class="panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h2>Consumption Breakdown</h2>
+                        <p>Percentage contribution, ranking &amp; combined cost.</p>
+                    </div>
+                </div>
+
+                <div id="houseComparisonList" class="comparison-list">
+                    <p class="loading-placeholder">Computing house rankings...</p>
+                </div>
+
+                <!-- COMBINED SYSTEM TOTALS CARD -->
+                <div class="total-consumption-card">
+                    <div class="total-row">
+                        <div>
+                            <span class="total-label">Combined Energy Consumption</span>
+                            <strong class="total-value" id="combinedEnergy">0.000 kWh</strong>
+                        </div>
+                        <div class="total-right">
+                            <span class="total-label">Combined Estimated Bill</span>
+                            <strong class="total-cost-value" id="combinedCost">₹0.00</strong>
+                        </div>
+                    </div>
+                    <div class="total-subtext">
+                        <span>Sum of House 1, 2, and 3</span>
+                        <span id="combinedTariffSummary">Tariff: ₹8.50 / kWh</span>
+                    </div>
+                </div>
+
+                <!-- HIGHEST / LOWEST CONSUMER CALLOUT -->
+                <div class="consumer-extremes-row">
+                    <div class="extreme-badge extreme-highest" id="highestConsumerBadge">
+                        <span class="extreme-icon">🔥</span>
+                        <div>
+                            <small>Highest Consumer</small>
+                            <strong id="highestConsumerName">House 1 (Villa)</strong>
+                        </div>
+                    </div>
+                    <div class="extreme-badge extreme-lowest" id="lowestConsumerBadge">
+                        <span class="extreme-icon">🌿</span>
+                        <div>
+                            <small>Lowest Consumer</small>
+                            <strong id="lowestConsumerName">House 3 (Studio Flat)</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </article>
+
+        </section>
+
+
+        <!-- =====================================================
+             SECTION 3 & 4: MONTHLY ENERGY REPORTS & EMAIL DELIVERY
+             ===================================================== -->
+        <section id="reports" class="panel reports-section-panel">
+
+            <div class="section-title-wrap">
+                <div class="title-with-pill">
+                    <h2>Monthly Energy Reports &amp; Email Delivery</h2>
+                    <span class="section-badge">PRODUCTION READY</span>
+                </div>
+                <p>Complete executive report generator, instant browser preview, downloadable PDF/CSV exports, and secure backend-ready email dispatch workflow.</p>
+            </div>
+
+            <!-- GRID FOR REPORT PANELS A & B -->
+            <div class="report-management-grid">
+
+                <!-- -----------------------------------------------
+                     PANEL A: REPORT CONFIGURATION
+                     ----------------------------------------------- -->
+                <div class="report-subpanel" id="panelReportConfig">
+                    <div class="subpanel-header">
+                        <div class="step-num">A</div>
+                        <div>
+                            <h3>Report Configuration</h3>
+                            <p>Select period parameters, recipients, and output format.</p>
+                        </div>
+                    </div>
+
+                    <form id="reportConfigForm" onsubmit="return false;" novalidate>
+
+                        <div class="form-row form-row-2">
+                            <div class="form-group">
+                                <label for="reportPeriodSelect">Report Period</label>
+                                <select id="reportPeriodSelect">
+                                    <option value="current_month" selected>Current Month</option>
+                                    <option value="previous_month">Previous Month</option>
+                                    <option value="custom_month">Custom Specified Month</option>
+                                    <option value="session_total">Current Session (Live Accumulation)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reportMonthSelect">Month &amp; Year</label>
+                                <div class="month-year-group">
+                                    <select id="reportMonthSelect">
+                                        <option value="0">January</option>
+                                        <option value="1">February</option>
+                                        <option value="2">March</option>
+                                        <option value="3">April</option>
+                                        <option value="4">May</option>
+                                        <option value="5">June</option>
+                                        <option value="6">July</option>
+                                        <option value="7">August</option>
+                                        <option value="8">September</option>
+                                        <option value="9" selected>October</option>
+                                        <option value="10">November</option>
+                                        <option value="11">December</option>
+                                    </select>
+                                    <select id="reportYearSelect">
+                                        <option value="2027">2027</option>
+                                        <option value="2026" selected>2026</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2024">2024</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- HOUSE-WISE EMAIL RECIPIENTS SECTION (SEPARATE DISPATCH) -->
+                        <div class="house-emails-container">
+                            <div class="house-emails-header">
+                                <div>
+                                    <label class="section-sub-label">Resident Recipient Emails (Separate Delivery for 3 Houses)</label>
+                                    <p class="field-help-text">Each house receives its own dedicated electricity bill and telemetry report sent directly to their email address.</p>
+                                </div>
+                                <span class="badge badge-separate-mode">⚡ 3 SEPARATE DISPATCHES</span>
+                            </div>
+
+                            <div class="house-email-cards-grid">
+                                <!-- HOUSE 1 EMAIL CARD -->
+                                <div class="house-email-card card-h1-border">
+                                    <div class="card-house-top">
+                                        <div class="house-pill-tag h1-tag">HOUSE 1</div>
+                                        <span class="house-desc-label">Villa / Main Residence</span>
+                                    </div>
+                                    <div class="house-email-field">
+                                        <input
+                                            type="email"
+                                            id="reportHouse1Email"
+                                            value="villa.resident@voltguard.org"
+                                            placeholder="house1.resident@voltguard.org"
+                                            title="Recipient email for House 1"
+                                            required
+                                        >
+                                    </div>
+                                    <button type="button" class="btn-send-single-house" id="btnSendHouse1" title="Send monthly bill directly to House 1 resident">
+                                        ✉ Send House 1 Bill
+                                    </button>
+                                </div>
+
+                                <!-- HOUSE 2 EMAIL CARD -->
+                                <div class="house-email-card card-h2-border">
+                                    <div class="card-house-top">
+                                        <div class="house-pill-tag h2-tag">HOUSE 2</div>
+                                        <span class="house-desc-label">Urban Apartment (2BHK)</span>
+                                    </div>
+                                    <div class="house-email-field">
+                                        <input
+                                            type="email"
+                                            id="reportHouse2Email"
+                                            value="apartment.resident@voltguard.org"
+                                            placeholder="house2.resident@voltguard.org"
+                                            title="Recipient email for House 2"
+                                            required
+                                        >
+                                    </div>
+                                    <button type="button" class="btn-send-single-house" id="btnSendHouse2" title="Send monthly bill directly to House 2 resident">
+                                        ✉ Send House 2 Bill
+                                    </button>
+                                </div>
+
+                                <!-- HOUSE 3 EMAIL CARD -->
+                                <div class="house-email-card card-h3-border">
+                                    <div class="card-house-top">
+                                        <div class="house-pill-tag h3-tag">HOUSE 3</div>
+                                        <span class="house-desc-label">Studio Flat / Annex</span>
+                                    </div>
+                                    <div class="house-email-field">
+                                        <input
+                                            type="email"
+                                            id="reportHouse3Email"
+                                            value="annex.resident@voltguard.org"
+                                            placeholder="house3.resident@voltguard.org"
+                                            title="Recipient email for House 3"
+                                            required
+                                        >
+                                    </div>
+                                    <button type="button" class="btn-send-single-house" id="btnSendHouse3" title="Send monthly bill directly to House 3 resident">
+                                        ✉ Send House 3 Bill
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- OPTIONAL MANAGER COPY -->
+                            <div class="manager-email-drawer">
+                                <details class="manager-details">
+                                    <summary>Facility Manager &amp; Optional CC Recipients (Combined Overview)</summary>
+                                    <div class="form-row form-row-2 manager-fields-row">
+                                        <div class="form-group">
+                                            <label for="reportRecipientEmail">Manager Email (Estate Overview)</label>
+                                            <input type="email" id="reportRecipientEmail" value="manager@voltguard.org" placeholder="manager@voltguard.org">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reportCcEmails">CC Recipients (Audit / Accounts)</label>
+                                            <input type="text" id="reportCcEmails" placeholder="audit@voltguard.org, accounts@society.in">
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+
+                        <div class="form-row form-row-2">
+                            <div class="form-group">
+                                <label for="reportTariffInput">Electricity Tariff (₹ / kWh)</label>
+                                <div class="input-with-affix">
+                                    <span class="affix-prefix">₹</span>
+                                    <input
+                                        type="number"
+                                        id="reportTariffInput"
+                                        min="1"
+                                        max="50"
+                                        step="0.10"
+                                        value="8.50"
+                                    >
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Report Format</label>
+                                <div class="format-radio-group">
+                                    <label class="radio-pill">
+                                        <input type="radio" name="reportFormat" value="pdf" checked>
+                                        <span>PDF Document</span>
+                                    </label>
+                                    <label class="radio-pill">
+                                        <input type="radio" name="reportFormat" value="csv">
+                                        <span>CSV Spreadsheet</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6 REQUIRED BUTTONS WITH SEPARATE 3-HOUSE DISPATCH -->
+                        <div class="report-button-grid">
+                            <button type="button" class="primary-button btn-highlight" id="btnGenerateReport">
+                                ⚡ 1. Generate Reports
+                            </button>
+                            <button type="button" class="secondary-button" id="btnPreviewReport">
+                                👁 2. Preview Report
+                            </button>
+                            <button type="button" class="secondary-button" id="btnDownloadPdf">
+                                📄 3. Download PDF
+                            </button>
+                            <button type="button" class="secondary-button" id="btnDownloadCsv">
+                                📊 4. Download CSV
+                            </button>
+                            <button type="button" class="primary-button btn-send btn-send-separate" id="btnSendReportEmail">
+                                ✉ 5. Send Separate Emails (All 3 Houses)
+                            </button>
+                            <button type="button" class="secondary-button btn-schedule-link" id="btnJumpToScheduler">
+                                ⏱ 6. Schedule Monthly Report
+                            </button>
+                        </div>
+
+                        <div class="secondary-actions-bar">
+                            <button type="button" class="text-button-link" id="btnSendCombinedReport">
+                                📋 Send Combined Executive Summary to Manager (manager@voltguard.org)
+                            </button>
+                        </div>
+
+                        <!-- STATUS FEEDBACK BANNER -->
+                        <div class="action-feedback-box" id="actionFeedbackBox" hidden>
+                            <div class="feedback-icon" id="feedbackIcon">ℹ</div>
+                            <div class="feedback-text" id="feedbackText">Action status</div>
+                        </div>
+
+                    </form>
+                </div>
+
+
+                <!-- -----------------------------------------------
+                     PANEL B: REPORT SUMMARY
+                     ----------------------------------------------- -->
+                <div class="report-subpanel" id="panelReportSummary">
+                    <div class="subpanel-header">
+                        <div class="step-num">B</div>
+                        <div>
+                            <h3>Executive Report Summary</h3>
+                            <p>High-level totals, consumer shares, and monthly variance.</p>
+                        </div>
+                    </div>
+
+                    <div class="summary-cards-row">
+                        <div class="summary-mini-card">
+                            <span class="mini-label">REPORT PERIOD</span>
+                            <strong class="mini-value" id="summaryPeriodLabel">October 2026</strong>
+                            <small class="mini-subtext" id="summaryTariffLabel">Tariff: ₹8.50 / kWh</small>
+                        </div>
+                        <div class="summary-mini-card highlight-cyan-border">
+                            <span class="mini-label">TOTAL ENERGY</span>
+                            <strong class="mini-value" id="summaryTotalEnergy">0.00 kWh</strong>
+                            <small class="mini-subtext">3 Houses Combined</small>
+                        </div>
+                        <div class="summary-mini-card highlight-pink-border">
+                            <span class="mini-label">TOTAL ESTIMATED COST</span>
+                            <strong class="mini-value" id="summaryTotalCost">₹0.00</strong>
+                            <small class="mini-subtext">Cumulative Bill</small>
+                        </div>
+                    </div>
+
+                    <!-- HOUSE-WISE SUMMARY TABLE -->
+                    <div class="summary-table-wrap">
+                        <table class="report-data-table" id="summaryTable">
+                            <thead>
+                                <tr>
+                                    <th>House</th>
+                                    <th>Classification</th>
+                                    <th>Energy (kWh)</th>
+                                    <th>Contribution</th>
+                                    <th>Estimated Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody">
+                                <!-- Populated dynamically by script.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- CONSUMER ANALYSIS & PREVIOUS MONTH VARIANCE -->
+                    <div class="variance-analysis-card">
+                        <div class="variance-item">
+                            <span class="variance-label">Highest Consumer:</span>
+                            <strong class="variance-val" id="summaryHighestConsumer">House 1 — Villa (54%)</strong>
+                        </div>
+                        <div class="variance-item">
+                            <span class="variance-label">Lowest Consumer:</span>
+                            <strong class="variance-val" id="summaryLowestConsumer">House 3 — Studio Flat (15%)</strong>
+                        </div>
+                        <div class="variance-item variance-history-note" id="summaryPrevMonthComparison">
+                            <span class="variance-label">Previous Month Variance:</span>
+                            <span class="variance-val-note" id="summaryVarianceText">
+                                ℹ Baseline established. Stored historical database records needed for multi-month variance computation.
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ---------------------------------------------------
+                 PANEL C: REPORT PREVIEW
+                 --------------------------------------------------- -->
+            <div class="report-preview-panel-wrap" id="panelReportPreview">
+                <div class="subpanel-header">
+                    <div class="step-num">C</div>
+                    <div>
+                        <h3>Formatted Report Preview</h3>
+                        <p>Document preview rendered in-browser prior to export or email delivery.</p>
+                    </div>
+
+                    <div class="preview-header-actions">
+                        <button type="button" class="preview-tool-btn" id="btnPrintPreview" title="Print document or save using browser dialog">🖨 Print / PDF</button>
+                        <button type="button" class="preview-tool-btn" id="btnCopyReportText" title="Copy report text to clipboard">📋 Copy Summary</button>
+                    </div>
+                </div>
+
+                <!-- PREVIEW SCOPE SELECTOR (COMBINED VS INDIVIDUAL RESIDENCE BILL) -->
+                <div class="preview-scope-bar">
+                    <span class="scope-bar-label">Preview Statement:</span>
+                    <div class="scope-tabs-group" role="tablist">
+                        <button type="button" class="scope-tab active" data-scope="combined" id="scopeBtnCombined">
+                            ▦ All 3 Houses (Combined Overview)
+                        </button>
+                        <button type="button" class="scope-tab" data-scope="1" id="scopeBtnH1">
+                            ⌂ House 1: Villa (Resident Bill)
+                        </button>
+                        <button type="button" class="scope-tab" data-scope="2" id="scopeBtnH2">
+                            ⌂ House 2: Apartment (Resident Bill)
+                        </button>
+                        <button type="button" class="scope-tab" data-scope="3" id="scopeBtnH3">
+                            ⌂ House 3: Studio (Resident Bill)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PREVIEW CONTAINER TO BE CONVERTED TO PDF / PRINTED -->
+                <div class="report-document-sheet" id="reportPreviewDocument">
+
+                    <div class="report-doc-header">
+                        <div class="doc-brand">
+                            <span class="doc-logo-icon">⚡</span>
+                            <div>
+                                <h2 class="doc-title">VOLTGUARD IoT — RESIDENTIAL ENERGY REPORT</h2>
+                                <p class="doc-subtitle">Smart Multi-House Telemetry &amp; Electricity Cost Analysis</p>
+                            </div>
+                        </div>
+
+                        <div class="doc-meta">
+                            <div class="doc-meta-item"><span>Report ID:</span> <strong id="docReportId">VG-RPT-202610-001</strong></div>
+                            <div class="doc-meta-item"><span>Generated:</span> <strong id="docGeneratedDate">--</strong></div>
+                            <div class="doc-meta-item"><span>Reporting Period:</span> <strong id="docPeriodText">October 2026</strong></div>
+                            <div class="doc-meta-item"><span>Tariff Applied:</span> <strong id="docTariffText">₹8.50 per kWh</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="doc-section-heading">
+                        <h4>1. Executive Summary &amp; Three-House Overview</h4>
+                    </div>
+
+                    <div class="doc-summary-cards">
+                        <div class="doc-kpi-card">
+                            <span class="doc-kpi-label">TOTAL ENERGY CONSUMPTION</span>
+                            <strong class="doc-kpi-value" id="docKpiEnergy">0.000 kWh</strong>
+                            <small>Sum of all 3 residences</small>
+                        </div>
+                        <div class="doc-kpi-card">
+                            <span class="doc-kpi-label">TOTAL ESTIMATED BILL</span>
+                            <strong class="doc-kpi-value" id="docKpiCost">₹0.00</strong>
+                            <small>Based on ₹8.50/kWh tariff</small>
+                        </div>
+                        <div class="doc-kpi-card">
+                            <span class="doc-kpi-label">HIGHEST ENERGY CONSUMER</span>
+                            <strong class="doc-kpi-value" id="docKpiHighest">House 1 (Villa)</strong>
+                            <small id="docKpiHighestPct">--% of total load</small>
+                        </div>
+                        <div class="doc-kpi-card">
+                            <span class="doc-kpi-label">LOWEST ENERGY CONSUMER</span>
+                            <strong class="doc-kpi-value" id="docKpiLowest">House 3 (Studio Flat)</strong>
+                            <small id="docKpiLowestPct">--% of total load</small>
+                        </div>
+                    </div>
+
+                    <div class="doc-section-heading">
+                        <h4>2. Electrical Parameter &amp; Telemetry Breakdown</h4>
+                    </div>
+
+                    <div class="doc-table-wrap">
+                        <table class="doc-table" id="docTelemetryTable">
+                            <thead>
+                                <tr>
+                                    <th>House</th>
+                                    <th>Category</th>
+                                    <th>Voltage (V)</th>
+                                    <th>Current (A)</th>
+                                    <th>Power (W)</th>
+                                    <th>Freq (Hz)</th>
+                                    <th>PF</th>
+                                    <th>Energy (kWh)</th>
+                                    <th>Est. Cost (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docTelemetryTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="doc-section-heading">
+                        <h4>3. Visual Energy Consumption Distribution</h4>
+                    </div>
+
+                    <div class="doc-bars-container" id="docVisualBars">
+                        <!-- Visual breakdown bars generated here -->
+                    </div>
+
+                    <div class="doc-footer">
+                        <p>Report generated via VoltGuard IoT Energy Management System · Architecture ready for IoT Smart Meter hardware ingestion.</p>
+                        <p>Recipients: <span id="docRecipientsList">Not specified</span></p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ---------------------------------------------------
+                 PANEL D: REPORT HISTORY
+                 --------------------------------------------------- -->
+            <div class="report-subpanel" id="panelReportHistory">
+                <div class="subpanel-header">
+                    <div class="step-num">D</div>
+                    <div>
+                        <h3>Report Generation &amp; Delivery History</h3>
+                        <p>Persistent audit trail of previously generated reports, export logs, and email delivery statuses.</p>
+                    </div>
+
+                    <div class="history-controls">
+                        <button type="button" class="secondary-button btn-small" id="btnClearHistory">Clear History</button>
+                    </div>
+                </div>
+
+                <div class="history-table-wrap">
+                    <table class="report-data-table history-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Period</th>
+                                <th>Generated</th>
+                                <th>Total Energy</th>
+                                <th>Total Cost</th>
+                                <th>Recipient</th>
+                                <th>Delivery Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <!-- Populated from localStorage -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SECTION 5: AUTOMATIC MONTHLY EMAIL SCHEDULING
+             ===================================================== -->
+        <section id="scheduling" class="panel scheduling-panel">
+
+            <div class="panel-header">
+                <div>
+                    <h2>Automatic Monthly Email Scheduling</h2>
+                    <p>Automate recurring end-of-month energy reports and automated email dispatch.</p>
+                </div>
+
+                <div class="scheduler-status-badge" id="schedulerStatusBadge">
+                    <span class="status-indicator-dot" id="schedulerDot"></span>
+                    <span id="schedulerStatusText">Scheduler Configured (Demo Mode)</span>
+                </div>
+            </div>
+
+            <form id="schedulerForm" class="scheduler-form-grid" onsubmit="return false;">
+
+                <div class="scheduler-toggle-row">
+                    <label class="switch-container">
+                        <input type="checkbox" id="schedulerEnableToggle" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                    <div class="switch-meta">
+                        <strong>Enable Automated Monthly Email Delivery</strong>
+                        <p>Generate and transmit reports on the configured day of each calendar month.</p>
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="schedDeliveryMode">Automated Delivery Mode</label>
+                        <select id="schedDeliveryMode">
+                            <option value="separate" selected>Separate Emails to All 3 Houses (Individual Bills to Residents)</option>
+                            <option value="manager">Combined Executive Report to Manager Only</option>
+                            <option value="both">Both (Separate Bills to Residents + Manager Summary)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="schedRecipientEmail">Manager Summary Email (Fallback/Copy)</label>
+                        <input type="email" id="schedRecipientEmail" placeholder="manager@voltguard.org" value="manager@voltguard.org">
+                    </div>
+                </div>
+
+                <!-- DYNAMIC RESIDENTS EMAIL TAGS IN SCHEDULER -->
+                <div class="sched-recipients-summary" id="schedRecipientsSummary">
+                    <span class="sched-recipients-title">Target Resident Recipients for Scheduled Monthly Run:</span>
+                    <div class="sched-recipients-tags">
+                        <span class="sched-tag tag-h1">House 1: <strong id="schedTagH1">villa.resident@voltguard.org</strong></span>
+                        <span class="sched-tag tag-h2">House 2: <strong id="schedTagH2">apartment.resident@voltguard.org</strong></span>
+                        <span class="sched-tag tag-h3">House 3: <strong id="schedTagH3">annex.resident@voltguard.org</strong></span>
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label for="schedDeliveryDay">Delivery Day of Month</label>
+                        <select id="schedDeliveryDay">
+                            <option value="1" selected>1st Day of Month (00:00)</option>
+                            <option value="5">5th Day of Month</option>
+                            <option value="10">10th Day of Month</option>
+                            <option value="15">15th Day of Month</option>
+                            <option value="28">28th Day of Month</option>
+                            <option value="last">Last Day of Month</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="schedDeliveryTime">Preferred Delivery Time</label>
+                        <input type="time" id="schedDeliveryTime" value="09:00">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-3">
+                    <div class="form-group">
+                        <label for="schedReportingPeriod">Reporting Scope</label>
+                        <select id="schedReportingPeriod">
+                            <option value="prev_calendar_month" selected>Previous Full Calendar Month</option>
+                            <option value="current_month_to_date">Current Month-to-Date</option>
+                            <option value="trailing_30_days">Trailing 30 Days</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="schedFormat">Attachment Format</label>
+                        <select id="schedFormat">
+                            <option value="pdf" selected>PDF Executive Report</option>
+                            <option value="csv">CSV Data Spreadsheet</option>
+                            <option value="both">Both (PDF + CSV)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="schedTimezone">Time Zone</label>
+                        <select id="schedTimezone">
+                            <option value="Asia/Kolkata" selected>Asia/Kolkata (IST · UTC+5:30)</option>
+                            <option value="UTC">UTC (Coordinated Universal Time)</option>
+                            <option value="America/New_York">America/New_York (EST)</option>
+                            <option value="Europe/London">Europe/London (GMT/BST)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- DYNAMIC NEXT SCHEDULED DELIVERY BANNER -->
+                <div class="next-delivery-banner">
+                    <div class="banner-icon">📅</div>
+                    <div class="banner-info">
+                        <span>Calculated Next Scheduled Run:</span>
+                        <strong id="schedNextRunDisplay">Calculating next trigger...</strong>
+                    </div>
+                    <div class="banner-policy">
+                        <span class="policy-tag">Retry Policy: 3 attempts with exponential backoff</span>
+                    </div>
+                </div>
+
+                <div class="scheduler-actions">
+                    <button type="button" class="primary-button" id="btnSaveSchedule">Save Schedule Settings</button>
+                    <button type="button" class="secondary-button" id="btnTestScheduleTrigger">Simulate Scheduled Dispatch</button>
+                    <button type="button" class="secondary-button" id="btnResetSchedule">Reset to Defaults</button>
+                </div>
+
+                <p class="scheduler-feedback" id="schedulerFeedback" hidden></p>
+
+            </form>
+
+        </section>
+
+
+        <!-- =====================================================
+             FOOTER
+             ===================================================== -->
+        <footer class="footer">
+            <div class="footer-left">
+                <strong>VoltGuard IoT — Smart Multi-House Energy Monitoring System</strong>
+                <p>Designed for academic demonstration and real-world microgrid telemetry integration.</p>
+            </div>
+            <div class="footer-right">
+                <span class="footer-badge">Mathematical Single-Phase Model (P = V · I · PF)</span>
+                <p>Simulated telemetry · Non-hardware measured readings</p>
+            </div>
+        </footer>
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     DELIVERY STATUS DETAILS MODAL DIALOG
+     ===================================================== -->
+<div class="modal-backdrop" id="deliveryStatusModal" hidden>
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 id="modalTitle">Delivery Status Details</h3>
+            <button type="button" class="modal-close-btn" id="btnCloseStatusModal">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Populated dynamically -->
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="secondary-button" id="btnModalClose">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- TOAST CONTAINER FOR REAL-TIME FEEDBACK -->
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<!-- MAIN SCRIPT -->
+<script src="script.js"></script>
+
+</body>
+</html>
