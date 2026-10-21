@@ -1,4 +1,4 @@
-# ⚡ Smart IoT Energy Meter
+#  Smart IoT Energy Meter
 
 ### An IoT-Based Real-Time Energy Monitoring and Management System
 
