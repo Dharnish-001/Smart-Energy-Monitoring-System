@@ -43,6 +43,8 @@ The proposed system supports independent energy monitoring for multiple houses, 
 | Wi-Fi | Wireless data transmission |
 | SSD1306 Library | OLED display control |
 | Wokwi | Circuit simulation and testing |
+| FastAPI | Modular REST API backend and telemetry ingestion |
+| SQLite | Local database for persistent time-series & audit logs |
 | Web Dashboard | Remote energy monitoring and visualization |
 | Fusion 360 | 3D enclosure design |
 
@@ -81,3 +83,17 @@ The system follows the workflow below:
            |             |
            v             v
      Local Monitoring  Remote Monitoring
+```
+
+## 🚀 Running the Web Application & API
+
+The full-stack system is located in the single folder `smart-energy/`:
+
+```bash
+cd smart-energy
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+- **Web Dashboard**: [http://localhost:8000](http://localhost:8000)
+- **Interactive API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)

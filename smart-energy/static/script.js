@@ -16,7 +16,9 @@ const CONFIG = {
 };
 
 const API_CONFIG = {
-    baseUrl: "http://localhost:8000",
+    baseUrl: (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin !== "null")
+        ? window.location.origin
+        : "http://localhost:8000",
     endpoints: {
         health: "/api/health",
         dashboard: "/api/dashboard",
