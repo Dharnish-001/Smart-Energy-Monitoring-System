@@ -17,8 +17,13 @@
     <!-- Chart.js for Live Power and Energy Comparison Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- html2pdf.js for Client-Side Executive PDF Report Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- html2pdf.js for Client-Side Executive PDF Report Generation (Local bundle with CDN fallback) -->
+    <script src="html2pdf.bundle.min.js"></script>
+    <script>
+        if (typeof html2pdf === "undefined") {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"><\/script>');
+        }
+    </script>
 </head>
 
 <body>

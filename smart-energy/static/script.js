@@ -1154,7 +1154,7 @@ function downloadCSV() {
     showToast("CSV report generated and downloaded successfully.", "success");
 }
 
-function downloadPDF() {
+async function downloadPDF() {
     if (!activeReport) {
         activeReport = generateReport(true);
     }
@@ -1165,33 +1165,85 @@ function downloadPDF() {
         return;
     }
 
+    // Refresh preview document content to ensure clean rendering
+    updatePanelCPreview(activeReport);
+
     const isSingle = currentPreviewScope !== "combined";
     const filename = isSingle
         ? `VoltGuard_Statement_House_${currentPreviewScope}_${activeReport.period.replace(/[\s\/]/g, "_")}.pdf`
         : `VoltGuard_Energy_Report_${activeReport.period.replace(/[\s\/]/g, "_")}.pdf`;
 
+    const downloadBtn = document.getElementById("btnDownloadPdf");
+    const originalText = downloadBtn ? downloadBtn.innerHTML : "";
+    if (downloadBtn) {
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = "⏳ Generating PDF...";
+    }
+
     showToast(`Preparing PDF document (${isSingle ? 'House ' + currentPreviewScope : 'All 3 Houses'})...`, "info");
 
-    const opt = {
-        margin: [10, 10, 10, 10],
-        filename: filename,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-    };
+    // Ensure html2pdf library is loaded (local bundle with CDN fallback)
+    if (typeof html2pdf === "undefined") {
+        try {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement("script");
+                s.src = "html2pdf.bundle.min.js";
+                s.onload = resolve;
+                s.onerror = () => {
+                    const fallback = document.createElement("script");
+                    fallback.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+                    fallback.onload = resolve;
+                    fallback.onerror = reject;
+                    document.head.appendChild(fallback);
+                };
+                document.head.appendChild(s);
+            });
+        } catch (e) {
+            console.warn("Could not dynamically load html2pdf:", e);
+        }
+    }
 
     if (typeof html2pdf !== "undefined") {
-        html2pdf().set(opt).from(element).save().then(() => {
+        // html2canvas configuration: scrollY: 0 and scrollX: 0 are CRITICAL to prevent white/blank page capture
+        const opt = {
+            margin: [8, 8, 8, 8],
+            filename: filename,
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                scrollY: 0,
+                scrollX: 0,
+                backgroundColor: "#0f192b",
+                windowWidth: element.scrollWidth || 800
+            },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+            pagebreak: { mode: ["avoid-all", "css", "legacy"] }
+        };
+
+        try {
+            await html2pdf().set(opt).from(element).save();
             showToast("PDF report downloaded successfully.", "success");
             activeReport.status = "Ready to Send";
             saveReportHistory();
             renderReportHistoryTable();
-        }).catch(err => {
+        } catch (err) {
             console.error("html2pdf generation error:", err);
-            showToast("PDF renderer encountered an issue. Falling back to print dialog.", "warning");
+            showToast("PDF renderer issue. Opening system print dialog...", "warning");
             window.print();
-        });
+        } finally {
+            if (downloadBtn) {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = originalText;
+            }
+        }
     } else {
+        if (downloadBtn) {
+            downloadBtn.disabled = false;
+            downloadBtn.innerHTML = originalText;
+        }
+        showToast("Opening print dialog. Select 'Save as PDF' in the destination dropdown.", "info");
         window.print();
     }
 }
